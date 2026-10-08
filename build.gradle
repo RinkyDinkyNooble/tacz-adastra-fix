@@ -93,12 +93,9 @@ tasks.named('jar', Jar).configure {
                 'MixinConfigs'            : "${mod_id}.mixins.json",
         ])
     }
-    // Ship the license and Ad Astra's notice inside the jar too.
+    // Ship the license inside the jar too.
     from('LICENSE') {
         rename { "LICENSE_${mod_id}" }
-    }
-    from('NOTICE') {
-        rename { "NOTICE_${mod_id}" }
     }
     finalizedBy 'reobfJar'
 }

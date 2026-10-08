@@ -1,8 +1,8 @@
 # TaCZ Ad Astra Arm Fix (Unofficial Patch)
 
-With an Ad Astra space suit, netherite space suit or jet suit on, Ad Astra 1.15.21 draws the first-person right arm as a second left arm. The arm sits off to the side and its texture is mirrored. It's easy to miss with an empty hand, but TaCZ places both hands exactly on a gun, so there the right arm visibly misses the grip. This small companion mod draws the correct suit arm for each hand.
+With an Ad Astra space suit, netherite space suit or jet suit on, Ad Astra replaces your first-person arms with the suit's arms, and they sit in the wrong place. TaCZ places both hands exactly on a gun, so there the arms visibly miss the gun. This small companion mod draws your normal arms in first person instead, exactly as without a suit, so TaCZ guns are held properly.
 
-Nothing else changes. Other chestplates, third person and everything outside first-person arms are untouched.
+Nothing else changes. The suit still shows in third person and to other players, and other chestplates are untouched.
 
 Client-only. It does nothing on a server, and clients and servers don't need to match.
 

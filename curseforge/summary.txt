@@ -1,1 +1,1 @@
-Fixes the first-person right arm of Ad Astra space suits, which Ad Astra draws as a second left arm. Most visible while holding a TaCZ gun.
+With an Ad Astra space suit on, your first-person arms are drawn as normal arms instead of misplaced suit arms, so TaCZ guns are held properly.

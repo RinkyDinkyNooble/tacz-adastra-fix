@@ -2,16 +2,17 @@ package com.rinkynooble.taczadastrafix.mixin;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.rinkynooble.taczadastrafix.TaczAdAstraFix;
-import com.rinkynooble.taczadastrafix.client.SuitArmRenderer;
+import com.rinkynooble.taczadastrafix.client.AdAstraSuits;
 import net.minecraft.client.model.PlayerModel;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.LivingEntityRenderer;
 import net.minecraft.client.renderer.entity.player.PlayerRenderer;
+import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.world.entity.EquipmentSlot;
-import net.minecraft.world.item.ItemStack;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
@@ -21,12 +22,19 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
  * First-person arms (vanilla's empty hand, TaCZ's gun hands, Ad Astra's zip gun) all go through
- * {@code renderRightHand}/{@code renderLeftHand}, which call the private {@code renderHand}. Ad Astra
- * replaces {@code renderHand} for space suits but always draws the suit's left arm. With a suit on, this
- * draws the matching suit arm here instead and skips {@code renderHand}. Anything else runs untouched.
+ * {@code renderRightHand}/{@code renderLeftHand}, which fire Forge's arm event and then call the private
+ * {@code renderHand}. Ad Astra replaces {@code renderHand} with a suit arm whenever a space suit is worn,
+ * and that arm sits wrong. With a suit on, this draws the normal arm the way vanilla's {@code renderHand}
+ * does and skips the call, so Ad Astra's replacement never runs. Anything else runs untouched.
  */
 @Mixin(PlayerRenderer.class)
 public abstract class PlayerRendererMixin extends LivingEntityRenderer<AbstractClientPlayer, PlayerModel<AbstractClientPlayer>> {
+    @Unique
+    private static final String RENDER_HAND = "Lnet/minecraft/client/renderer/entity/player/PlayerRenderer;renderHand("
+            + "Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;I"
+            + "Lnet/minecraft/client/player/AbstractClientPlayer;"
+            + "Lnet/minecraft/client/model/geom/ModelPart;Lnet/minecraft/client/model/geom/ModelPart;)V";
+
     private PlayerRendererMixin(EntityRendererProvider.Context context, PlayerModel<AbstractClientPlayer> model, float shadowRadius) {
         super(context, model, shadowRadius);
     }
@@ -34,40 +42,40 @@ public abstract class PlayerRendererMixin extends LivingEntityRenderer<AbstractC
     @Shadow
     protected abstract void setModelProperties(AbstractClientPlayer player);
 
-    @Inject(method = "renderRightHand", at = @At("HEAD"), cancellable = true)
+    // After Forge's RenderArmEvent, so a mod that cancels that event still wins.
+    @Inject(method = "renderRightHand", at = @At(value = "INVOKE", target = RENDER_HAND), cancellable = true)
     private void taczadastrafix$renderRightHand(PoseStack poseStack, MultiBufferSource buffer, int light,
                                                 AbstractClientPlayer player, CallbackInfo ci) {
-        taczadastrafix$renderSuitArm(poseStack, buffer, light, player, true, ci);
+        if (taczadastrafix$renderPlainArm(poseStack, buffer, light, player, this.getModel().rightArm, this.getModel().rightSleeve)) {
+            ci.cancel();
+        }
     }
 
-    @Inject(method = "renderLeftHand", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "renderLeftHand", at = @At(value = "INVOKE", target = RENDER_HAND), cancellable = true)
     private void taczadastrafix$renderLeftHand(PoseStack poseStack, MultiBufferSource buffer, int light,
                                                AbstractClientPlayer player, CallbackInfo ci) {
-        taczadastrafix$renderSuitArm(poseStack, buffer, light, player, false, ci);
+        if (taczadastrafix$renderPlainArm(poseStack, buffer, light, player, this.getModel().leftArm, this.getModel().leftSleeve)) {
+            ci.cancel();
+        }
     }
 
+    /** Draws the arm exactly as vanilla's renderHand does, if an Ad Astra suit is worn. Returns whether it drew. */
     @Unique
-    private void taczadastrafix$renderSuitArm(PoseStack poseStack, MultiBufferSource buffer, int light,
-                                              AbstractClientPlayer player, boolean rightHand, CallbackInfo ci) {
-        if (!TaczAdAstraFix.isActive()) {
-            return;
+    private boolean taczadastrafix$renderPlainArm(PoseStack poseStack, MultiBufferSource buffer, int light,
+                                                  AbstractClientPlayer player, ModelPart arm, ModelPart sleeve) {
+        if (!TaczAdAstraFix.isActive() || !AdAstraSuits.isSuit(player.getItemBySlot(EquipmentSlot.CHEST))) {
+            return false;
         }
-        ItemStack chest = player.getItemBySlot(EquipmentSlot.CHEST);
-        if (!SuitArmRenderer.hasSuitArm(chest)) {
-            return;
-        }
-
-        // Pose the player model as vanilla's renderHand (and Ad Astra) does.
         PlayerModel<AbstractClientPlayer> model = this.getModel();
         this.setModelProperties(player);
         model.attackTime = 0.0F;
         model.crouching = false;
         model.swimAmount = 0.0F;
         model.setupAnim(player, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F);
-        ModelPart playerArm = rightHand ? model.rightArm : model.leftArm;
-        playerArm.xRot = 0.0F;
-
-        SuitArmRenderer.render(chest, rightHand, playerArm, poseStack, buffer, light);
-        ci.cancel();
+        arm.xRot = 0.0F;
+        arm.render(poseStack, buffer.getBuffer(RenderType.entitySolid(player.getSkinTextureLocation())), light, OverlayTexture.NO_OVERLAY);
+        sleeve.xRot = 0.0F;
+        sleeve.render(poseStack, buffer.getBuffer(RenderType.entityTranslucent(player.getSkinTextureLocation())), light, OverlayTexture.NO_OVERLAY);
+        return true;
     }
 }

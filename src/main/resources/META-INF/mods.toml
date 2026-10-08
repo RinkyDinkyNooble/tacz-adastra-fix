@@ -11,7 +11,7 @@ displayURL="${mod_url}"
 logoFile="${mod_id}.png"
 logoBlur=false
 authors="${mod_authors}"
-credits="Ad Astra is made by Terrarium (Alex Nijjar and contributors). TaCZ is made by the TaCZ team. This patch only corrects which suit arm Ad Astra draws."
+credits="Ad Astra is made by Terrarium (Alex Nijjar and contributors). TaCZ is made by the TaCZ team. This patch only changes how first-person arms look with an Ad Astra suit on."
 # Client-only and does nothing on a server, so a client and server don't have to match.
 displayTest="IGNORE_ALL_VERSION"
 description='''${mod_description}'''
