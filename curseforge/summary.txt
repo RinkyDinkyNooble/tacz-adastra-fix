@@ -1,1 +1,1 @@
-With an Ad Astra space suit on, your first-person arms are drawn as normal arms instead of misplaced suit arms, so TaCZ guns are held properly.
+Fixes stretched, misplaced first-person arms when holding a TaCZ gun with an Ad Astra space suit on. Your normal arms are shown instead.

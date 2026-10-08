@@ -1,6 +1,6 @@
 # TaCZ Ad Astra Arm Fix (Unofficial Patch)
 
-With an Ad Astra space suit, netherite space suit or jet suit on, Ad Astra replaces your first-person arms with the suit's arms, and they sit in the wrong place. TaCZ places both hands exactly on a gun, so there the arms visibly miss the gun. This small companion mod draws your normal arms in first person instead, exactly as without a suit, so TaCZ guns are held properly.
+With an Ad Astra space suit, netherite space suit or jet suit chestplate on, your first-person arms go wrong while holding a TaCZ gun. They stretch, point off into the distance and get worse as you aim, reload and run. This small companion mod draws your normal arms in first person instead, exactly as without a suit, so TaCZ guns are held properly.
 
 Nothing else changes. The suit still shows in third person and to other players, and other chestplates are untouched.
 
@@ -18,9 +18,11 @@ This is an unofficial patch, not affiliated with Ad Astra or TaCZ. [Ad Astra](ht
 
 Every first-person arm goes through vanilla's `PlayerRenderer.renderRightHand` or `renderLeftHand`: the empty hand, TaCZ's gun hands and Ad Astra's zip gun. Each fires Forge's `RenderArmEvent`, then calls the private `renderHand`. Ad Astra's `PlayerRendererMixin` cancels `renderHand` whenever the chestplate is a space suit and draws the suit's arm instead.
 
-This mod injects just before that `renderHand` call. When the chestplate is an Ad Astra suit, it draws the arm and sleeve the way vanilla's `renderHand` does and skips the call, so Ad Astra's replacement never runs. Forge's event still fires first. With any other chestplate it does nothing.
+Cancelling `renderHand` also skips [playerAnimator](https://github.com/KosmX/minecraftPlayerAnimator)'s hook there. That hook marks the model as a first-person render just before `setupAnim`. TaCZ plays its third-person gun animations (holding, aiming, reloading) through playerAnimator, so without that mark they're applied to the first-person arm, bend included. Ad Astra's suit arm also always uses the suit's left arm, even for the right hand.
 
-At startup the log says `Fix applied`, or `Fix not applied` if a later Ad Astra no longer has its `SpaceSuitItem` class. In that case the mod does nothing and Ad Astra draws its suit arm as before.
+This mod injects just before the `renderHand` call. When the chestplate is an Ad Astra suit, it draws the arm and sleeve the way vanilla's `renderHand` does, including playerAnimator's first-person step, and skips the call, so Ad Astra's replacement never runs. Forge's event still fires first. With any other chestplate it does nothing.
+
+At startup the log says `Fix applied`, or `Fix not applied` if a later Ad Astra no longer has its `SpaceSuitItem` class. In that case the mod does nothing and Ad Astra draws its suit arm as before. playerAnimator is optional; without it there are no third-person animations to keep off the arm.
 
 ## Building
 
@@ -30,8 +32,9 @@ Put these jars in `libs/` (it's gitignored), then run `gradlew build`:
 - `botarium-forge-1.20.1-2.3.4.jar`
 - `resourcefullib-forge-1.20.1-2.1.29.jar`
 - `resourcefulconfig-forge-1.20.1-2.1.3.jar`
+- `player-animation-lib-forge-1.0.2-rc1+1.20.jar` (optional at runtime)
 - `tacz-1.20.1-1.1.8-hotfix2.jar` (only loaded in the dev client for testing, never compiled against)
 
 ## License
 
-MIT. No Ad Astra or TaCZ code or assets are included, and the icon is original.
+MIT. No Ad Astra, TaCZ or playerAnimator code or assets are included, and the icon is original.

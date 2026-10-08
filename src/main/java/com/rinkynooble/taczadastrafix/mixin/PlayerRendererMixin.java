@@ -3,6 +3,7 @@ package com.rinkynooble.taczadastrafix.mixin;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.rinkynooble.taczadastrafix.TaczAdAstraFix;
 import com.rinkynooble.taczadastrafix.client.AdAstraSuits;
+import com.rinkynooble.taczadastrafix.client.PlayerAnimatorCompat;
 import net.minecraft.client.model.PlayerModel;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.player.AbstractClientPlayer;
@@ -23,9 +24,11 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 /**
  * First-person arms (vanilla's empty hand, TaCZ's gun hands, Ad Astra's zip gun) all go through
  * {@code renderRightHand}/{@code renderLeftHand}, which fire Forge's arm event and then call the private
- * {@code renderHand}. Ad Astra replaces {@code renderHand} with a suit arm whenever a space suit is worn,
- * and that arm sits wrong. With a suit on, this draws the normal arm the way vanilla's {@code renderHand}
- * does and skips the call, so Ad Astra's replacement never runs. Anything else runs untouched.
+ * {@code renderHand}. Ad Astra replaces {@code renderHand} with a suit arm whenever a space suit is worn.
+ * That also skips playerAnimator's hook in {@code renderHand}, so TaCZ's third-person gun animations get
+ * applied to the first-person arm. With a suit on, this draws the normal arm the way vanilla's
+ * {@code renderHand} does, including playerAnimator's step, and skips the call, so Ad Astra's replacement
+ * never runs. Anything else runs untouched.
  */
 @Mixin(PlayerRenderer.class)
 public abstract class PlayerRendererMixin extends LivingEntityRenderer<AbstractClientPlayer, PlayerModel<AbstractClientPlayer>> {
@@ -71,6 +74,10 @@ public abstract class PlayerRendererMixin extends LivingEntityRenderer<AbstractC
         model.attackTime = 0.0F;
         model.crouching = false;
         model.swimAmount = 0.0F;
+        // Without this, TaCZ's third-person gun animations (via playerAnimator) land on the first-person arm.
+        if (TaczAdAstraFix.hasPlayerAnimator()) {
+            PlayerAnimatorCompat.prepForFirstPersonRender(model, player);
+        }
         model.setupAnim(player, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F);
         arm.xRot = 0.0F;
         arm.render(poseStack, buffer.getBuffer(RenderType.entitySolid(player.getSkinTextureLocation())), light, OverlayTexture.NO_OVERLAY);
