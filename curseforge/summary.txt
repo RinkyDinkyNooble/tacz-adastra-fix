@@ -1,0 +1,1 @@
+Fixes the first-person right arm of Ad Astra space suits, which Ad Astra draws as a second left arm. Most visible while holding a TaCZ gun.

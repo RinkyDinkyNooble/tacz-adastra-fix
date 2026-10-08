@@ -1,0 +1,13 @@
+{
+  "required": true,
+  "minVersion": "0.8.5",
+  "package": "com.rinkynooble.taczadastrafix.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "refmap": "taczadastrafix.refmap.json",
+  "client": [
+    "PlayerRendererMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
