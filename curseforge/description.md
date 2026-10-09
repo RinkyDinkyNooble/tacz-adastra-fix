@@ -20,10 +20,6 @@ The stretching happens when [playerAnimator](https://www.curseforge.com/minecraf
 
 Both clips play at double speed to keep the GIFs short.
 
-## Reason For Existing
-
-Temporarily exists until if/when Ad Astra fixes the issue.
-
 ### Credit
 
 This is an unofficial patch, not affiliated with Ad Astra or TaCZ. [Ad Astra](https://www.curseforge.com/minecraft/mc-mods/ad-astra) is made by Terrarium (Alex Nijjar and contributors). [TaCZ (Timeless and Classics Zero)](https://www.curseforge.com/minecraft/mc-mods/timeless-and-classics-zero) is made by the TaCZ team.
