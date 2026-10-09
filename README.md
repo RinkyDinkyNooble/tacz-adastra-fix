@@ -47,4 +47,4 @@ Put these jars in `libs/` (it's gitignored), then run `gradlew build`:
 
 ## License
 
-MIT. No Ad Astra, TaCZ or playerAnimator code or assets are included, and the icon is original.
+MIT. No Ad Astra, TaCZ or playerAnimator code or assets are included. The icon is made from the before and after clips above.
