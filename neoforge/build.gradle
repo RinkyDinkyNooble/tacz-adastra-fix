@@ -1,0 +1,70 @@
+plugins {
+    id 'net.neoforged.moddev' version '2.0.148'
+}
+
+sourceSets {
+    verify {
+        java.srcDir rootProject.file('common/src/verify/java')
+    }
+}
+
+neoForge {
+    version = neoforge_version
+
+    addModdingDependenciesTo sourceSets.verify
+
+    mods {
+        "${mod_id}" {
+            sourceSet sourceSets.main
+        }
+        verify {
+            sourceSet sourceSets.verify
+        }
+    }
+
+    runs {
+        client {
+            client()
+        }
+        server {
+            server()
+        }
+        // Dev-only check with the built jar and the real target mods: see VerifyDriver.
+        verifyClient {
+            client()
+            sourceSet = sourceSets.verify
+            loadedMods = [mods.verify]
+            gameDirectory = file('run/verify')
+            programArguments.addAll '--width', '1280', '--height', '720'
+        }
+    }
+}
+
+var targetMods = rootProject.file('libs/neoforge')
+
+dependencies {
+    // Compiled against. Never packed into this mod's jar.
+    compileOnly files(
+            "${targetMods}/adastra-${minecraft_version}-${ad_astra_version}-neoforge.jar",
+            "${targetMods}/common-storage-lib-neoforge-${minecraft_version}-${common_storage_lib_version}.jar",
+            "${targetMods}/resourcefullib-neoforge-1.21-${resourcefullib_version}.jar",
+            "${targetMods}/resourcefulconfig-neoforge-1.21-${resourcefulconfig_version}.jar",
+            // Optional at runtime: the fix only calls it when it's installed.
+            "${targetMods}/player-animation-lib-forge-${player_animator_version}.jar",
+    )
+}
+
+tasks.register('copyVerifyMods', Sync) {
+    from tasks.named('jar')
+    from fileTree(targetMods) {
+        // gradlew :neoforge:runVerifyClient -PnoPlayerAnimator checks the fix without it installed.
+        if (project.hasProperty('noPlayerAnimator')) {
+            exclude 'player-animation-lib-*'
+        }
+    }
+    into file('run/verify/mods')
+}
+
+tasks.matching { it.name == 'runVerifyClient' }.configureEach {
+    dependsOn 'copyVerifyMods'
+}

@@ -1,5 +1,5 @@
 modLoader="javafml"
-loaderVersion="${loader_version_range}"
+loaderVersion="[1,)"
 license="${mod_license}"
 issueTrackerURL="${mod_issues}"
 
@@ -12,27 +12,28 @@ logoFile="${mod_id}.png"
 logoBlur=true
 authors="${mod_authors}"
 credits="Ad Astra is made by Terrarium (Alex Nijjar and contributors). TaCZ is made by the TaCZ team. This patch only changes how first-person arms look with an Ad Astra suit on."
-# Client-only and does nothing on a server, so a client and server don't have to match.
-displayTest="IGNORE_ALL_VERSION"
 description='''${mod_description}'''
 
+[[mixins]]
+config="${mod_id}.mixins.json"
+
 [[dependencies.${mod_id}]]
-    modId="forge"
-    mandatory=true
-    versionRange="${forge_version_range}"
+    modId="neoforge"
+    type="required"
+    versionRange="${neoforge_version_range}"
     ordering="NONE"
     side="BOTH"
 
 [[dependencies.${mod_id}]]
     modId="minecraft"
-    mandatory=true
+    type="required"
     versionRange="${minecraft_version_range}"
     ordering="NONE"
     side="BOTH"
 
 [[dependencies.${mod_id}]]
     modId="ad_astra"
-    mandatory=true
+    type="required"
     versionRange="${ad_astra_version_range}"
     ordering="AFTER"
     side="CLIENT"

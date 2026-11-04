@@ -13,6 +13,7 @@ import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.LivingEntityRenderer;
 import net.minecraft.client.renderer.entity.player.PlayerRenderer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EquipmentSlot;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -23,8 +24,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
  * First-person arms (vanilla's empty hand, TaCZ's gun hands, Ad Astra's zip gun) all go through
- * {@code renderRightHand}/{@code renderLeftHand}, which fire Forge's arm event and then call the private
- * {@code renderHand}. Ad Astra replaces {@code renderHand} with a suit arm whenever a space suit is worn.
+ * {@code renderRightHand}/{@code renderLeftHand}, which call the private {@code renderHand}.
+ * Ad Astra replaces {@code renderHand} with a suit arm whenever a space suit is worn.
  * That also skips playerAnimator's hook in {@code renderHand}, so TaCZ's third-person gun animations get
  * applied to the first-person arm. With a suit on, this draws the normal arm the way vanilla's
  * {@code renderHand} does, including playerAnimator's step, and skips the call, so Ad Astra's replacement
@@ -45,7 +46,7 @@ public abstract class PlayerRendererMixin extends LivingEntityRenderer<AbstractC
     @Shadow
     protected abstract void setModelProperties(AbstractClientPlayer player);
 
-    // After Forge's RenderArmEvent, so a mod that cancels that event still wins.
+    // On NeoForge this is after its RenderArmEvent, so a mod that cancels that event still wins.
     @Inject(method = "renderRightHand", at = @At(value = "INVOKE", target = RENDER_HAND), cancellable = true)
     private void taczadastrafix$renderRightHand(PoseStack poseStack, MultiBufferSource buffer, int light,
                                                 AbstractClientPlayer player, CallbackInfo ci) {
@@ -80,9 +81,10 @@ public abstract class PlayerRendererMixin extends LivingEntityRenderer<AbstractC
         }
         model.setupAnim(player, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F);
         arm.xRot = 0.0F;
-        arm.render(poseStack, buffer.getBuffer(RenderType.entitySolid(player.getSkinTextureLocation())), light, OverlayTexture.NO_OVERLAY);
+        ResourceLocation skin = player.getSkin().texture();
+        arm.render(poseStack, buffer.getBuffer(RenderType.entitySolid(skin)), light, OverlayTexture.NO_OVERLAY);
         sleeve.xRot = 0.0F;
-        sleeve.render(poseStack, buffer.getBuffer(RenderType.entityTranslucent(player.getSkinTextureLocation())), light, OverlayTexture.NO_OVERLAY);
+        sleeve.render(poseStack, buffer.getBuffer(RenderType.entityTranslucent(skin)), light, OverlayTexture.NO_OVERLAY);
         return true;
     }
 }

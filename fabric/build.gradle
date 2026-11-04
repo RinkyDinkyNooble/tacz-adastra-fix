@@ -1,0 +1,59 @@
+import net.fabricmc.loom.task.RemapJarTask
+import net.fabricmc.loom.task.prod.ClientProductionRunTask
+
+plugins {
+    id 'fabric-loom' version '1.17.21'
+}
+
+sourceSets {
+    verify {
+        java.srcDir rootProject.file('common/src/verify/java')
+        compileClasspath += main.compileClasspath
+    }
+}
+
+var targetMods = rootProject.file('libs/fabric')
+
+dependencies {
+    minecraft "com.mojang:minecraft:${minecraft_version}"
+    mappings loom.officialMojangMappings()
+    modImplementation "net.fabricmc:fabric-loader:${fabric_loader_version}"
+
+    // Compiled against. Never packed into this mod's jar.
+    modCompileOnly files(
+            "${targetMods}/adastra-${minecraft_version}-${ad_astra_version}-fabric.jar",
+            "${targetMods}/common-storage-lib-fabric-${minecraft_version}-${common_storage_lib_version}.jar",
+            "${targetMods}/resourcefullib-fabric-1.21-${resourcefullib_version}.jar",
+            "${targetMods}/resourcefulconfig-fabric-1.21-${resourcefulconfig_version}.jar",
+            // Optional at runtime: the fix only calls it when it's installed.
+            "${targetMods}/player-animation-lib-fabric-${player_animator_version}.jar",
+    )
+    // Only the dev check in src/verify uses it. The fix itself doesn't.
+    modCompileOnly "net.fabricmc.fabric-api:fabric-api:${fabric_api_version}"
+}
+
+// Dev-only check with the built jar and the real target mods, in a real Fabric install: see VerifyDriver.
+var verifyJar = tasks.register('verifyJar', Jar) {
+    from sourceSets.verify.output
+    archiveBaseName = 'verify'
+    archiveClassifier = 'dev'
+    destinationDirectory = layout.buildDirectory.dir('verify')
+}
+
+var remapVerifyJar = tasks.register('remapVerifyJar', RemapJarTask) {
+    inputFile = verifyJar.flatMap { it.archiveFile }
+    archiveBaseName = 'verify'
+    destinationDirectory = layout.buildDirectory.dir('verify')
+    addNestedDependencies = false
+}
+
+tasks.register('runVerifyClient', ClientProductionRunTask) {
+    mods.from tasks.named('remapJar'), remapVerifyJar, fileTree(targetMods) {
+        // gradlew :fabric:runVerifyClient -PnoPlayerAnimator checks the fix without it installed.
+        if (project.hasProperty('noPlayerAnimator')) {
+            exclude 'player-animation-lib-*'
+        }
+    }
+    runDir = file('run/verify')
+    programArgs.addAll '--width', '1280', '--height', '720'
+}

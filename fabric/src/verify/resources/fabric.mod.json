@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "id": "taczadastrafixverify",
+  "version": "1",
+  "name": "TaCZ Ad Astra Arm Fix dev check",
+  "description": "Dev-only. Never shipped.",
+  "license": "MIT",
+  "environment": "client",
+  "entrypoints": {
+    "client": ["com.rinkynooble.taczadastrafix.verify.fabric.VerifyFabric"]
+  }
+}
