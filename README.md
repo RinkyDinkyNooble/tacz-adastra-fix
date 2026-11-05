@@ -15,7 +15,7 @@ This branch is the Minecraft 1.21.1 version, for NeoForge and Fabric. The Forge 
 
 | Without the mod | With the mod |
 |---|---|
-| ![Without the mod](curseforge/images/Without-the-mod.gif) | ![With the mod](curseforge/images/With-the-mod.gif) |
+| ![Without the mod](https://raw.githubusercontent.com/RinkyDinkyNooble/tacz-adastra-fix/main/curseforge/images/Without-the-mod.gif) | ![With the mod](https://raw.githubusercontent.com/RinkyDinkyNooble/tacz-adastra-fix/main/curseforge/images/With-the-mod.gif) |
 
 Both clips play at double speed to keep the GIFs short. They were filmed on Minecraft 1.20.1. The 1.21.1 version looks the same.
 
@@ -38,6 +38,8 @@ At startup the log says `Fix applied`, or `Fix not applied` if a later Ad Astra 
 - `common/`: the fix itself, compiled into both jars.
 - `neoforge/`, `fabric/`: each loader's entry point, metadata and build script.
 - `common/src/verify/`, `neoforge/src/verify/`, `fabric/src/verify/`: the dev-only check below. Never shipped.
+
+The CurseForge description, summary, icon, images and one changelog per jar are all in `curseforge/` on `main`.
 
 ## Building
 
